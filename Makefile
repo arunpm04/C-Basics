@@ -9,14 +9,14 @@ CC=gcc
 CFLAGS=-Werror-unused-variables
 LDFLAGS=
 
-.PHONY: all cleanall
+.PHONY: all clean
 
 #==============================================================================
 # Build all Applications
 #==============================================================================
 all: hexdump linkedlist
 
-cleanall: clean_hexdump clean_linkedlist
+clean: clean_hexdump clean_linkedlist
 
 #==============================================================================
 hexdump:
