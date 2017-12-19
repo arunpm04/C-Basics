@@ -1,2 +1,2 @@
 # C-Basics
-C programs
+Collection of C codes for various functionalities with sample application.
