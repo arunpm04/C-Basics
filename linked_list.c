@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-
-/* Uncomment to enable debug */
-//#define ENABLE_DEBUG
+#include "app_debug.h"
 
 typedef struct node_t {
 	int value;
@@ -20,7 +18,7 @@ int print_list(node_t *base)
 	if (base == NULL)
 		return -1;
 	while (base != NULL) {
-		printf("%08X [%03d] [%08X <--> %08X]\n", base, base->value, base->prev, base->next);
+		ERR("%p [%03d] [%p <--> %p]\n", base, base->value, base->prev, base->next);
 		if (print_list(base->next) == 0)
 			break;
 	}
@@ -39,9 +37,7 @@ node_t* list_add(node_t *base, int data)
 		temp->next = base;
 		base->prev = temp;
 	}
-#ifdef ENABLE_DEBUG
-	printf("temp = %x [%03d] [%x <--> %x]\n", temp, temp->value, temp->prev, temp->next);
-#endif
+//	DBG("temp = %08p [%03d] [%08p <--> %08p]\n", temp, temp->value, temp->prev, temp->next);
 	return temp;
 }
 
@@ -51,21 +47,21 @@ node_t* list_add(node_t *base, int data)
  */
 int check_to_n_fro(node_t *base)
 {
-	node_t *root_backup = base, *old_base = NULL;
+	node_t *old_base = NULL;
 	if (base == NULL) {
 		printf("Root NULL\n");
 		return -1;
 	}
-	printf("FWD ---->\n");
+	ERR("FWD ---->\n");
 	while (base != NULL) {
-		printf("%08X [%03d] [%08X <--> %08X]\n", base, base->value, base->prev, base->next);
+		ERR("%p [%03d] [%p <--> %p]\n", base, base->value, base->prev, base->next);
 		old_base = base;
 		base = base->next;
 	}
-	printf("REV ---->\n");
+	ERR("REV ---->\n");
 	base = old_base;
 	while (base != NULL) {
-		printf("%08X [%03d] [%08X <--> %08X]\n", base, base->value, base->prev, base->next);
+		ERR("%p [%03d] [%p <--> %p]\n", base, base->value, base->prev, base->next);
 		base = base->prev;
 	}
 	return 0;
@@ -83,9 +79,53 @@ node_t* list_append(node_t *base, int data)
 		base = base->next;
 	base->next = temp;
 	temp->prev = base;
-#ifdef ENABLE_DEBUG
-	printf("temp = %x [%03d] [%x <--> %x]\n", temp, temp->value, temp->prev, temp->next);
-#endif
+//	DBG("temp = %p [%03d] [%p <--> %p]\n", temp, temp->value, temp->prev, temp->next);
+	return root_backup;
+}
+
+/*
+ * brief		: Delete the all nodes with matching data.
+ * return		: Pointer to the List root.
+ */
+node_t* list_delete(node_t *base, int data)
+{
+	int rerun = 1;
+	node_t *root_backup = base;
+
+	if (base == NULL)
+		return base;
+
+	while (rerun) {
+		rerun = 0;
+		while (base != NULL) {
+			if (base->value == data) {
+				DBG("Matched at %p\n", base);
+				if (base->prev == NULL) {
+					rerun = 1;
+					DBG("Root node...\n");
+					root_backup = base->next;
+					base->next->prev = NULL;
+					free(base);
+					break;
+				} else if (base->next == NULL) {
+					DBG("Apex node...\n");
+					base->prev->next = NULL;
+					free (base);
+					rerun = 0;
+					break;
+				} else {
+					rerun = 1;
+					node_t *temp = base->prev;
+					temp->next = base->next;
+					if (base->next)
+						base->next->prev = temp;
+					free(base);
+					break;
+				}
+			}
+			base = base->next;
+		}
+	}
 	return root_backup;
 }
 
@@ -94,15 +134,22 @@ int main(void)
 	node_t *root = list_add(NULL, 0);
 	int i;
 
-	printf("Adding 10 to 15...\n");
+	DBG("Adding 10 to 15...\n");
 	for (i=0; i<=5; i++)
 		root = list_add(root, (i+10));
-
-	printf("Appending 100 to 105...\n");
+	DBG("Appending 100 to 105...\n");
 	for (i=0; i<=5; i++)
 		root = list_append(root, (i+100));
-
-	printf("check_to_n_fro ...\n");
+	DBG("check_to_n_fro ...\n");
+	check_to_n_fro(root);
+	DBG("Deleting 10...\n");
+	root = list_delete(root, 10);
+	check_to_n_fro(root);
+	DBG("Deleting 105...\n");
+	root = list_delete(root, 105);
+	check_to_n_fro(root);
+	DBG("Deleting 15...\n");
+	root = list_delete(root, 15);
 	check_to_n_fro(root);
 	return 0;
 }

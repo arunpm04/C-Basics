@@ -1,15 +1,15 @@
 #Makefile_Begin
 
-VERBOSE = @
-USER = $(shell whoami)
-CWD=`pwd`
-MACHINE_TYPE=`uname -m`
+VERBOSE=@
+USER=$(shell whoami)
+CWD=$(shell pwd)
+MACHINE_TYPE=$(shell uname -m)
 
 CC=gcc
-CFLAGS=-Werror-unused-variables
+CFLAGS=-Werror=unused-variable -I. -DAPP_DEBUG_EN=1
 LDFLAGS=
 
-.PHONY: all clean
+.PHONY: all hexdump linkedlist clean clean_hexdump clean_linkedlist
 
 #==============================================================================
 # Build all Applications
@@ -20,12 +20,12 @@ clean: clean_hexdump clean_linkedlist
 
 #==============================================================================
 hexdump:
-	$(CC) -o hexdump $(CWD)/hexdump.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o hexdump $(CWD)/hexdump.c
 clean_hexdump:
 	$(RM) hexdump
 
 linkedlist:
-	$(CC) -o linkedlist $(CWD)/linked_list.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o linkedlist $(CWD)/linked_list.c
 clean_linkedlist:
 	$(RM) linkedlist
 
