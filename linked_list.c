@@ -129,6 +129,40 @@ node_t* list_delete(node_t *base, int data)
 	return root_backup;
 }
 
+/*
+ * brief		: Insert node with data after index.
+ * param1[in]	: Pointer to List root.
+ * param2[in]	: Index to skip.
+ * param3[in]	: Data.
+ * return		: Pointer to the List root.
+ */
+node_t* list_insert(node_t *base, int index, int data)
+{
+	int i;
+	node_t *root_backup = base;
+	if (index == 0) {
+		/* Insert node at Head. */
+		return list_add(base, data);
+	}
+	for (i = 1; (i <= index) && (base != NULL); i++)
+		base = base->next;
+	if ((base == NULL) && (i != index)) {
+		/* Not enough nodes, hence do append. */
+		return list_append(root_backup, data);
+	} else {
+		node_t *new = (node_t *)calloc(1, sizeof(node_t));
+		new->value = data;
+		if (new != NULL) {
+			base->next->prev = new;
+			new->next = base->next;
+			base->next = new;
+			new->prev = base;
+		} else
+			DBG("Alloc failed....\n");
+	}
+	return root_backup;
+}
+
 int main(void)
 {
 	node_t *root = list_add(NULL, 0);
@@ -150,6 +184,15 @@ int main(void)
 	check_to_n_fro(root);
 	DBG("Deleting 15...\n");
 	root = list_delete(root, 15);
+	check_to_n_fro(root);
+	DBG("Insert 200 at 0\n");
+	root = list_insert(root, 0, 200);
+	check_to_n_fro(root);
+	DBG("Insert 201 at 5\n");
+	root = list_insert(root, 5, 201);
+	check_to_n_fro(root);
+	DBG("Insert 202 at 50\n");
+	root = list_insert(root, 50, 202);
 	check_to_n_fro(root);
 	return 0;
 }
