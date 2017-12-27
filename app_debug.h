@@ -22,14 +22,14 @@
 #define __APP_DEBUG_H__
 
 #if APP_DEBUG_EN == 1
-#define DBG(fmt, args...)   fprintf(stdout, "[APP_DBG]" fmt, ##args)
-#define ERR(fmt, args...)   fprintf(stdout, "[APP_ERR]" fmt, ##args)
+#define DBG(fmt, args...)   fprintf(stdout, "[APP_DBG] " fmt, ##args)
+#define ERR(fmt, args...)   fprintf(stdout, "[APP_ERR] " fmt, ##args)
 #elif APP_DEBUG_EN == 2
-#define DBG(fmt, args...)   fprintf(stdout, "[APP_DBG]" fmt, ##args)
-#define ERR(fmt, args...)   fprintf(stderr, "[APP_ERR]" fmt, ##args)
+#define DBG(fmt, args...)   fprintf(stdout, "[APP_DBG] " fmt, ##args)
+#define ERR(fmt, args...)   fprintf(stderr, "[APP_ERR] " fmt, ##args)
 #elif APP_DEBUG_EN == 3
-#define DBG(fmt, args...)   fprintf(stderr, "[APP_DBG]" fmt, ##args)
-#define ERR(fmt, args...)   fprintf(stderr, "[APP_ERR]" fmt, ##args)
+#define DBG(fmt, args...)   fprintf(stderr, "[APP_DBG] " fmt, ##args)
+#define ERR(fmt, args...)   fprintf(stderr, "[APP_ERR] " fmt, ##args)
 #else
 #define DBG(fmt, args...)
 #define ERR(fmt, args...)

@@ -8,17 +8,26 @@ typedef struct node_t {
 	struct node_t *prev;
 } node_t;
 
-/*
- * brief		: Traverse through the linked list and dumps the content.
+typedef enum {
+	SORT_ASCEND = 0,
+	SORT_DESCEND,
+} sort_mode_t;
+
+/* brief		: Traverse through the linked list and dumps the content.
  * param1[in]	: Pointer to the list root.
  * return		: 0 if Success; else -1.
  */
 int print_list(node_t *base)
 {
+	int i = 1;
+
 	if (base == NULL)
 		return -1;
+	ERR("\n==========================================================================\n"
+		"\tIndex\tAddr\t\tValue\t[pAddr\t\t<-->\tnAddr]\n"
+		"==========================================================================\n");
 	while (base != NULL) {
-		ERR("%p [%03d] [%p <--> %p]\n", base, base->value, base->prev, base->next);
+		ERR("(%03d)\t%p\t[%03d]\t[%p\t<-->\t%p]\n", i++, base, base->value, base->prev, base->next);
 		if (print_list(base->next) == 0)
 			break;
 	}
@@ -47,23 +56,32 @@ node_t* list_add(node_t *base, int data)
  */
 int check_to_n_fro(node_t *base)
 {
+	int i = 1;
 	node_t *old_base = NULL;
 	if (base == NULL) {
 		printf("Root NULL\n");
 		return -1;
 	}
-	ERR("FWD ---->\n");
+	ERR("\n==========================================================================\n"
+		"  FWD:\tIndex\tAddr\t\tValue\t[pAddr\t\t<-->\tnAddr]\n"
+		"==========================================================================\n");
 	while (base != NULL) {
-		ERR("%p [%03d] [%p <--> %p]\n", base, base->value, base->prev, base->next);
+		ERR("(%03d)\t%p\t[%03d]\t[%p\t<-->\t%p]\n", i++, base, base->value, base->prev, base->next);
+		//ERR("(%03d) %p [%03d] [%p <--> %p]\n", i++, base, base->value, base->prev, base->next);
 		old_base = base;
 		base = base->next;
 	}
-	ERR("REV ---->\n");
+	ERR("\n==========================================================================\n"
+		"  REV:\tIndex\tAddr\t\tValue\t[pAddr\t\t<-->\tnAddr]\n"
+		"==========================================================================\n");
+	i = 1;
 	base = old_base;
 	while (base != NULL) {
-		ERR("%p [%03d] [%p <--> %p]\n", base, base->value, base->prev, base->next);
+		ERR("(%03d)\t%p\t[%03d]\t[%p\t<-->\t%p]\n", i++, base, base->value, base->prev, base->next);
+		//ERR("(%03d) %p [%03d] [%p <--> %p]\n", i++, base, base->value, base->prev, base->next);
 		base = base->prev;
 	}
+	ERR("================================================================\n");
 	return 0;
 }
 
@@ -163,6 +181,106 @@ node_t* list_insert(node_t *base, int index, int data)
 	return root_backup;
 }
 
+/*
+ * brief		: Will release the associated memory with the Linked list.
+ */
+void free_list(node_t *base)
+{
+	ERR("Releasing associated memory...\n");
+	while (base != NULL) {
+		base = base->next;
+		if (base->prev != NULL) {
+			DBG("%p\n", base->prev);
+			free(base->prev);
+			base->prev = NULL;
+			if (base->next == NULL)
+				break;
+		}
+	}
+	DBG("%p\n", base);
+	free(base);
+}
+
+/*
+ * brief		: Get the list length from reference.
+ * param1[in]	: Pointer to list root (reference).
+ * return		: length of List.
+ */
+int list_length(node_t *base)
+{
+	int length = 0;
+	while (base != NULL) {
+		length++;
+		base = base->next;
+	}
+	return length;
+}
+
+/*
+ * brief		: Sort the list from reference.
+ * param1[in]	: Pointer to list root (reference).
+ * param2[in]	: SORT_ASCEND or SORT_DESCEND.
+ * return		: Pointer to list root.
+ */
+node_t* list_sort(node_t *base, sort_mode_t mode)
+{
+	node_t *temp = NULL, *root_backup = base;
+	int length = list_length(base), i, do_sort;
+
+	if ((length != 0) && (base != NULL)) {
+		for (i = 0; i < length; i++) {
+			temp = root_backup;
+			while (temp->next != NULL) {
+				do_sort = 0;
+				if (mode == SORT_ASCEND) {
+					if (temp->value > temp->next->value)
+						do_sort = 1;
+				} else if (mode == SORT_DESCEND) {
+					if (temp->value < temp->next->value)
+						do_sort = 1;
+				}
+				if (do_sort) {
+					/* Check for ROOT node change */
+					if (root_backup == temp) {
+						temp = temp->next;
+						root_backup->prev = temp;
+						temp->next->prev = root_backup;
+						root_backup->next = temp->next;
+						temp->next = root_backup;
+						temp->prev = NULL;
+						root_backup = temp;
+						temp = root_backup;
+					} /* else if (temp->next->next == NULL) {
+						node_t *last = temp->next;
+						last->prev = temp->prev;
+						last->next = temp;
+						temp->prev->next = last;
+						temp->prev = last;
+						temp->next = NULL;
+					} */ else {
+						node_t *sec = temp->next;
+						if (sec->next != NULL)
+							sec->next->prev = temp;
+						if (temp->prev != NULL)
+							temp->prev->next = sec;
+						temp->next = sec->next;
+						sec->prev = temp->prev;
+						sec->next = temp;
+						temp->prev = sec;
+						temp = sec->prev;
+					}
+				}
+				if (temp->next != NULL)
+					temp = temp->next;
+			}
+		}
+	}
+	return root_backup;
+}
+
+/*
+ * brief	:	Sample program for illustration.
+ */
 int main(void)
 {
 	node_t *root = list_add(NULL, 0);
@@ -193,6 +311,16 @@ int main(void)
 	check_to_n_fro(root);
 	DBG("Insert 202 at 50\n");
 	root = list_insert(root, 50, 202);
+	root = list_append(root, 2);
 	check_to_n_fro(root);
+	DBG("Length = %d\n", list_length(root));
+	root = list_sort(root, SORT_ASCEND);
+	DBG("After SORT_ASCEND...\n");
+	check_to_n_fro(root);
+	root = list_sort(root, SORT_DESCEND);
+	DBG("After SORT_DESCEND...\n");
+	check_to_n_fro(root);
+	DBG("Deleting list...\n");
+	free_list(root);
 	return 0;
 }
