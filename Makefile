@@ -9,14 +9,14 @@ CC=gcc
 CFLAGS=-Werror=unused-variable -I. -DAPP_DEBUG_EN=1
 LDFLAGS=
 
-.PHONY: all hexdump linkedlist clean clean_hexdump clean_linkedlist
+.PHONY: all hexdump linkedlist statemachine clean clean_hexdump clean_linkedlist clean_statemachine
 
 #==============================================================================
 # Build all Applications
 #==============================================================================
-all: hexdump linkedlist
+all: hexdump linkedlist statemachine
 
-clean: clean_hexdump clean_linkedlist
+clean: clean_hexdump clean_linkedlist clean_statemachine
 
 #==============================================================================
 hexdump:
@@ -28,5 +28,10 @@ linkedlist:
 	$(CC) $(CFLAGS) $(LDFLAGS) -o linkedlist $(CWD)/linked_list.c
 clean_linkedlist:
 	$(RM) linkedlist
+
+statemachine:
+	$(CC) $(CFLAGS) $(LDFLAGS) -o statemachine $(CWD)/simple_state_machine.c
+clean_statemachine:
+	$(RM) statemachine
 
 # Makefile_End

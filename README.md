@@ -14,3 +14,6 @@ C routine to convert a buffer into ASCII/printable mode.
 ###### 3. app_debug :  
 C wrapper for debug print with redirectable output. Also has a 3 level debug log option.  
 
+###### 4. Simple State Machine In C :  
+Event driven state machine example in C.  
+
